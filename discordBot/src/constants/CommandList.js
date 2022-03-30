@@ -5,4 +5,7 @@ export const commands = {
   "!characters": "!characters",
   "!fd": "!fd",
   "!addplayer": "!addplayer",
+  "!addcharacter": "!addcharacter",
+  "!addfd": "!addfd",
+  "!fdall": "!fdall",
 };

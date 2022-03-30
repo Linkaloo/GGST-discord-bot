@@ -20,7 +20,7 @@ const apiGetAttacks = async (req, res) => {
     },
     include: {
       model: db.Character,
-      attributes: ["name"],
+      attributes: ["name", "image"],
       where: characterQuery,
     },
     where: attackQuery,
@@ -37,9 +37,27 @@ const apiCreateAttack = async (req, res) => {
   let response;
 
   try {
-    const character = await db.Character.findOne({ where: { name: attack.character } });
-    const newAttack = await character.createAttack(attack);
-    response = newAttack;
+    const attackExists = await db.Attack.findOne({
+      where: {
+        input: attack.input,
+      },
+      include: {
+        model: db.Character,
+        where: {
+          name: attack.character,
+        },
+      },
+    });
+    if (!attackExists) {
+      const character = await db.Character.findOne({ where: { name: attack.character } });
+
+      const newAttack = await character.createAttack(attack);
+      response = newAttack;
+    } else {
+      response = {
+        error: `This move, ${attack.input}, already exists`,
+      };
+    }
   } catch (err) {
     response = {
       error: err,

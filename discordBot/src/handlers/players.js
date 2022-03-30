@@ -2,19 +2,26 @@ import Discord from "discord.js";
 import * as requests from "../requests";
 
 export const playerHandler = async (message) => {
-  const params = message.content.split(" ");
-  const query = {};
+  const baseMessage = message.content.substring(message.content.indexOf("s") + 2);
+  const characterName = baseMessage.split(" ").filter((s) => s !== "").join(" ");
 
-  console.log(requests);
+  const { players } = await requests.getPlayers(characterName);
+  const embed = new Discord.MessageEmbed();
 
-  switch (params.length) {
-    case 2: query.character = `${params[1]}`;
-      break;
-    case 3: query.character = `${params[1]} ${params[2]}`;
-      break;
-    default: break;
-  }
-  return requests.getPlayers(query);
+  players.forEach((player) => {
+    if (player.stream) {
+      embed.addFields(
+        { name: player.name, value: `${player.Character.name}\n[ttv/${player.name}](${player.stream})` },
+      );
+    } else {
+      embed.addFields(
+        { name: player.name, value: `${player.Character.name}` },
+      );
+    }
+  });
+  embed.setTitle("Players");
+
+  return { embeds: [embed] };
 };
 
 export const addPlayerHandler = async (message) => {
@@ -44,13 +51,12 @@ export const addPlayerHandler = async (message) => {
     embed.setTitle("Error");
     embed.setDescription("Could Not Add Player");
     embed.setColor("RED");
-    return embed;
+    return { embeds: [embed] };
   }
 
-  console.log(response);
   embed.setTitle("Success");
   embed.setDescription(`Succesfully added player: **${response.name}**`);
   embed.setColor("GREEN");
 
-  return embed;
+  return { embeds: [embed] };
 };

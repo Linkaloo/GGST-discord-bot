@@ -8,18 +8,19 @@ export const getCharacters = async (query) => {
     data: query,
   });
 
-  // const { characters } = request.data;
-  // const embed = new Discord.MessageEmbed();
-  // let description = "";
-
-  // characters.forEach((character) => {
-  //   description += `${character.name}\n`;
-  // });
-
-  // embed.setTitle("Characters");
-  // embed.setDescription(description);
-  // return embed;
+  return request.data;
 };
 
-export const addCharacter = async (query) => {
+export const addCharacter = async (body) => {
+  try {
+    const request = await axios({
+      method: "POST",
+      url: `${process.env.BASE}/characters`,
+      data: body,
+    });
+
+    return request.data;
+  } catch (err) {
+    return err;
+  }
 };

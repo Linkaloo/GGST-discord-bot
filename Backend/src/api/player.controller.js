@@ -13,7 +13,7 @@ const apiGetPlayers = async (req, res) => {
     },
     include: {
       model: db.Character,
-      attributes: ["name"],
+      attributes: ["name", "image"],
       where: query,
     },
   });
@@ -27,7 +27,6 @@ const apiGetPlayers = async (req, res) => {
 const apiCreatePlayer = async (req, res) => {
   const player = req.body;
   let response;
-  console.log(player);
 
   try {
     const character = await db.Character.findOne({ where: { name: player.character } });
@@ -38,7 +37,6 @@ const apiCreatePlayer = async (req, res) => {
       error: err,
     };
   }
-  console.log(response);
   return res.json(response);
 };
 

@@ -10,9 +10,10 @@ const commandHandler = async (message) => {
     case "!players": return ggst.playerHandler(message);
     case "!addplayer": return ggst.addPlayerHandler(message);
     case "!characters": return ggst.characterHandler(message);
-    case "!addcharcter": return ggst.addCharacterHandler(message);
+    case "!addcharacter": return ggst.addCharacterHandler(message);
     case "!fd": return ggst.characterMoveHandler(message);
     case "!addfd": return ggst.addMoveHandler(message);
+    case "!fdall": return ggst.allCharacterMoveHandler(message);
     default: break;
   }
 
@@ -20,8 +21,7 @@ const commandHandler = async (message) => {
 };
 
 const sendMessage = async (channel, message) => {
-  channel.send({ embeds: [message] });
-  // channel.send(message);
+  channel.send(message);
 };
 
 const processMessage = async (message) => {

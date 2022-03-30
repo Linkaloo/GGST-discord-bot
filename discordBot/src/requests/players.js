@@ -1,24 +1,29 @@
 import Discord from "discord.js";
 import axios from "axios";
 
-export const getPlayers = async (query) => {
-  const request = await axios({
-    method: "GET",
-    url: `${process.env.BASE}/players`,
-    data: query,
-  });
+export const getPlayers = async (character) => {
+  if (character) {
+    try {
+      const request = await axios({
+        method: "GET",
+        url: `${process.env.BASE}/players/${character}`,
+      });
+      return request.data;
+    } catch (err) {
+      return err;
+    }
+  }
 
-  const { players } = request.data;
-  const embed = new Discord.MessageEmbed();
+  try {
+    const request = await axios({
+      method: "GET",
+      url: `${process.env.BASE}/players`,
+    });
 
-  players.forEach((player) => {
-    embed.addFields(
-      { name: player.name, value: `${player.Character.name}\n[ttv/${player.name}](${player.stream})` },
-    );
-  });
-  embed.setTitle("Players");
-
-  return embed;
+    return request.data;
+  } catch (err) {
+    return err;
+  }
 };
 
 export const addPlayer = async (body) => {

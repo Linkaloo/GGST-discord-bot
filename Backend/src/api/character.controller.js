@@ -16,7 +16,6 @@ const apiGetCharacters = async (req, res) => {
 const apiCreateCharacter = async (req, res) => {
   const character = req.body;
   let response;
-
   try {
     const newCharacter = await db.Character.create(character);
     response = newCharacter;

@@ -1,4 +1,5 @@
 import Discord from "discord.js";
+import AsciiTable from "ascii-table";
 import * as requests from "../requests";
 
 export const characterMoveHandler = async (message) => {
@@ -6,62 +7,125 @@ export const characterMoveHandler = async (message) => {
   const characterName = baseMessage.split(" ").filter((s) => s !== "").join(" ");
   const embed = new Discord.MessageEmbed();
 
-  console.log(`character name: ${characterName}`);
-
   if (characterName === "") {
+    embed.setTitle("Error");
+    embed.setDescription("Provide a character idiot");
     embed.setColor("RED");
-    embed.setDescription("Enter a character name idiot");
-    return embed;
+    return { embeds: [embed] };
   }
 
   const { attacks } = await requests.getCharacterFrameData(characterName);
 
-  const frameInfo = {
-    input: "",
-    damage: "",
-    guard: "",
-    startup: "",
-    active: "",
-    recovery: "",
-    onBlock: "",
-    attackLevel: "",
-  };
-  let line = "";
+  if (attacks.length === 0) {
+    embed.setTitle("Error");
+    embed.setDescription("Either character or frame data do not exist");
+    embed.setColor("RED");
+    return { embeds: [embed] };
+  }
+
+  const table = new AsciiTable(`${attacks[0].Character.name} Frame Data`);
+
+  table.setHeading("Input", "Damage", "Guard", "Startup", "Active", "Recovery", "OnBlock", "Level");
 
   attacks.forEach((attack) => {
-    frameInfo.input += `${attack.input}\n`;
-    frameInfo.damage += `${attack.damage}\n`;
-    frameInfo.guard += `${attack.guard}\n`;
-    frameInfo.startup += `${attack.startup}\n`;
-    frameInfo.active += `${attack.active}\n`;
-    frameInfo.recovery += `${attack.recovery}\n`;
-    frameInfo.onBlock += `${attack.on_block}\n`;
-    frameInfo.attackLevel += `${attack.attack_level}\n`;
-
-    line += `${attack.input}    ${attack.damage}     ${attack.guard}   ${attack.startup}       ${attack.active}      ${attack.recovery}         ${attack.on_block}     ${attack.attack_level}\n`;
+    table.addRow(
+      attack.input,
+      attack.damage,
+      attack.guard,
+      attack.startup,
+      attack.active,
+      attack.recovery,
+      attack.on_block,
+      attack.attack_level,
+    );
   });
 
-  embed.setTitle(attacks[0].Character.name);
-  // embed.setFields(
-  //   { name: "Input", value: frameInfo.input, inline: true },
-  //   { name: "Damage", value: frameInfo.damage, inline: true },
-  //   { name: "Guard", value: frameInfo.guard, inline: true },
-  //   { name: "Startup", value: frameInfo.startup, inline: true },
-  //   { name: "Active", value: frameInfo.active },
-  //   { name: "Recovery", value: frameInfo.recovery, inline: true },
-  //   { name: "On Block", value: frameInfo.onBlock, inline: true },
-  //   { name: "Attack Level", value: frameInfo.attackLevel, inline: true },
-  // );
+  const stringTable = `\`\`\`json\n${table.toString()}\`\`\``;
 
-  embed.setDescription(
-    `\`\`\`Input Damage Guard Startup Active Recovery OnBlock Level\n${line}\`\`\``,
-  );
-
-  // return `**##Input Damage Guard Startup Active Recovery OnBlock AttackLevel**\n${line}`;
-
-  return embed;
+  return stringTable;
 };
 
 export const addMoveHandler = async (message) => {
+  const baseMessage = message.content.substring(message.content.indexOf(" ") + 1);
+  const moveString = baseMessage.split(",").filter((s) => s !== "");
+  const embed = new Discord.MessageEmbed();
 
+  const character = moveString[0].replace(/^\s/g, "").replace(/\s{2,}/g, " ");
+  const input = moveString[1].replace(/^\s/g, "").replace(/\s{2,}/g, " ");
+  const damage = moveString[2].replace(/^\s/g, "").replace(/\s{2,}/g, " ");
+  const guard = moveString[3].replace(/^\s/g, "").replace(/\s{2,}/g, " ");
+  const startup = moveString[4].replace(/^\s/g, "").replace(/\s{2,}/g, " ");
+  const active = moveString[5].replace(/^\s/g, "").replace(/\s{2,}/g, " ");
+  const recovery = moveString[6].replace(/^\s/g, "").replace(/\s{2,}/g, " ");
+  const onBlock = moveString[7].replace(/^\s/g, "").replace(/\s{2,}/g, " ");
+  const attackLevel = moveString[8].replace(/^\s/g, "").replace(/\s{2,}/g, " ");
+
+  const body = {
+    character,
+    input,
+    damage: parseInt(damage, 10),
+    guard,
+    startup: parseInt(startup, 10),
+    active: parseInt(active, 10),
+    recovery: parseInt(recovery, 10),
+    on_block: parseInt(onBlock, 10),
+    attack_level: parseInt(attackLevel, 10),
+  };
+
+  const response = await requests.addFrameData(body);
+
+  if (response.error) {
+    embed.setTitle("Error");
+    embed.setDescription("Could not add frame data to character or this move already exists");
+    embed.setColor("RED");
+    return { embeds: [embed] };
+  }
+
+  embed.setTitle("Success");
+  embed.setDescription(`Succesfully added frame data for: **${response.input}**`);
+  embed.setColor("GREEN");
+
+  return { embeds: [embed] };
+};
+
+export const allCharacterMoveHandler = async (message) => {
+  const baseMessage = message.content.substring(message.content.indexOf(" ") + 1);
+  const moveString = baseMessage.replace(/^\s/g, "").replace(/\s{2,}/g, "");
+
+  if (moveString[0] === "!") {
+    const embed = new Discord.MessageEmbed();
+    embed.setColor("RED");
+    embed.setDescription("Enter an input idiot");
+    return { embeds: [embed] };
+  }
+
+  const { attacks } = await requests.allFrameData(moveString);
+  if (attacks.length === 0) {
+    const embed = new Discord.MessageEmbed();
+    embed.setColor("RED");
+    embed.setDescription("Move does not exist for any character");
+    return { embeds: [embed] };
+  }
+
+  const table = new AsciiTable(`All Character's ${attacks[0].input}`);
+
+  table.setHeading("Character", "Input", "Damage", "Guard", "Startup", "Active", "Recovery", "OnBlock", "Level");
+
+  attacks.forEach((attack) => {
+    table.addRow(
+      attack.Character.name,
+      attack.input,
+      attack.damage,
+      attack.guard,
+      attack.startup,
+      attack.active,
+      attack.recovery,
+      attack.on_block,
+      attack.attack_level,
+    );
+  });
+
+  const stringTable = `\`\`\`json\n${table.toString()}\`\`\``;
+
+  return stringTable;
 };

@@ -24,7 +24,7 @@ module.exports = {
       },
       {
         name: "Ramlethal Valentine",
-        image: "https://dustloop.com/wiki/index.php?title=GGST/Ramlethal_Valentine",
+        image: "https://dustloop.com/wiki/images/f/fa/GGST_Ramlethal_Valentine_Portrait.png",
         created_at: new Date(),
         updated_at: new Date(),
       },
