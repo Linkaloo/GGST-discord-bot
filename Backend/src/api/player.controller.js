@@ -42,8 +42,9 @@ const apiCreatePlayer = async (req, res) => {
 
 const apiDeletePlayer = async (req, res) => {
   let response;
+  const { params } = req;
   try {
-    const des = await db.Player.destroy({ where: { id: req.params.id } });
+    const des = await db.Player.destroy({ where: { name: params.player } });
     response = {
       total_deleted: des,
     };
@@ -56,4 +57,46 @@ const apiDeletePlayer = async (req, res) => {
   return res.json(response);
 };
 
-export default { apiGetPlayers, apiCreatePlayer, apiDeletePlayer };
+const apiUpdatePlayer = async (req, res) => {
+  const update = req.body;
+  let response;
+
+  if (update.character) {
+    try {
+      const newCharacter = await db.Character.findOne({ where: { name: update.character } });
+      update.character_id = newCharacter.id;
+    } catch (err) {
+      response = {
+        error: "Character not found",
+        character: update.character,
+      };
+      return res.json(response);
+    }
+  }
+
+  try {
+    const updatedPlayer = await db.Player.update(
+      update,
+      {
+        where: {
+          name: update.current,
+        },
+      },
+    );
+
+    response = {
+      updated: updatedPlayer[0] === 1,
+      player: update.name,
+      character: update.character_id ? update.character : undefined,
+    };
+  } catch (err) {
+    response = {
+      error: err,
+    };
+  }
+  return res.json(response);
+};
+
+export default {
+  apiGetPlayers, apiCreatePlayer, apiDeletePlayer, apiUpdatePlayer,
+};

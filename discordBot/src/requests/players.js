@@ -39,3 +39,16 @@ export const addPlayer = async (body) => {
     return err;
   }
 };
+
+export const deletePlayer = async (player) => {
+  try {
+    const request = await axios({
+      method: "DELETE",
+      url: `${process.env.BASE}/players/${player}`,
+    });
+
+    return request.data;
+  } catch (err) {
+    return err;
+  }
+};

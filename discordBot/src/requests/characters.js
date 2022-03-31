@@ -24,3 +24,16 @@ export const addCharacter = async (body) => {
     return err;
   }
 };
+
+export const deleteCharacter = async (character) => {
+  try {
+    const request = await axios({
+      method: "DELETE",
+      url: `${process.env.BASE}/characters/${character}`,
+    });
+
+    return request.data;
+  } catch (err) {
+    return err;
+  }
+};

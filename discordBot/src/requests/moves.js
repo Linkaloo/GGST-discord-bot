@@ -38,3 +38,16 @@ export const allFrameData = async (move) => {
     return err;
   }
 };
+
+export const deleteMove = async (character, input) => {
+  try {
+    const request = await axios({
+      method: "DELETE",
+      url: `${process.env.BASE}/attacks/${character}/${input}`,
+    });
+
+    return request.data;
+  } catch (err) {
+    return err;
+  }
+};

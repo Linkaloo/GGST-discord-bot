@@ -8,4 +8,7 @@ export const commands = {
   "!addcharacter": "!addcharacter",
   "!addfd": "!addfd",
   "!fdall": "!fdall",
+  "!delplayer": "!delplayer",
+  "!delfd": "!delfd",
+  "!delcharacter": "!delcharacter",
 };

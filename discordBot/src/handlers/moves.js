@@ -1,20 +1,21 @@
 import Discord from "discord.js";
 import AsciiTable from "ascii-table";
 import * as requests from "../requests";
+import { parseCharacterAlias } from "../utility/parseAliases";
 
 export const characterMoveHandler = async (message) => {
-  const baseMessage = message.content.substring(message.content.indexOf("d") + 1);
-  const characterName = baseMessage.split(" ").filter((s) => s !== "").join(" ");
+  const baseMessage = message.content.substring(message.content.indexOf(" ") + 1);
+  const characterInput = baseMessage.split(" ").filter((s) => s !== "").join(" ");
   const embed = new Discord.MessageEmbed();
 
-  if (characterName === "") {
+  if (characterInput[0] === "!") {
     embed.setTitle("Error");
     embed.setDescription("Provide a character idiot");
     embed.setColor("RED");
     return { embeds: [embed] };
   }
-
-  const { attacks } = await requests.getCharacterFrameData(characterName);
+  const character = parseCharacterAlias(characterInput);
+  const { attacks } = await requests.getCharacterFrameData(character);
 
   if (attacks.length === 0) {
     embed.setTitle("Error");
@@ -128,4 +129,44 @@ export const allCharacterMoveHandler = async (message) => {
   const stringTable = `\`\`\`json\n${table.toString()}\`\`\``;
 
   return stringTable;
+};
+
+export const deleteMoveHandler = async (message) => {
+  const baseMessage = message.content.substring(message.content.indexOf(" ") + 1);
+  const args = baseMessage.split(",").filter((s) => s !== "");
+  const embed = new Discord.MessageEmbed();
+
+  if (args[0][0] === "!" || args.length < 2) {
+    embed.setDescription("Provide a character and their move input, comma separated").setColor("RED");
+    return { embeds: [embed] };
+  }
+
+  const character = args[0].replace(/^\s/g, "").replace(/\s{2,}/g, "");
+  const input = args[1].replace(/^\s/g, "").replace(/\s{2,}/g, "");
+
+  const response = await requests.deleteMove(character, input);
+  if (response.error) {
+    console.log(response);
+    if (response.error === "Character not found") {
+      embed.setDescription(`Character: ${response.character} not found`);
+    } else {
+      embed.setDescription("Could not delete move");
+    }
+    embed.setTitle("Error");
+    embed.setColor("RED");
+    return { embeds: [embed] };
+  }
+
+  if (response.total_deleted === 0) {
+    embed.setTitle("Error");
+    embed.setDescription(`No move ${input} from ${character} to delete`);
+    embed.setColor("YELLOW");
+    return { embeds: [embed] };
+  }
+
+  embed.setTitle("Success");
+  embed.setDescription(`Succesfully deleted move **${input}** from **${character}**`);
+  embed.setColor("GREEN");
+
+  return { embeds: [embed] };
 };

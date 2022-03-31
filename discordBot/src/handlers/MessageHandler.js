@@ -9,11 +9,19 @@ const commandHandler = async (message) => {
       break;
     case "!players": return ggst.playerHandler(message);
     case "!addplayer": return ggst.addPlayerHandler(message);
+    // case "!updateplayer": return ggst.updatePlayerHandler(message);
+    case "!delplayer": return ggst.deletePlayerHandler(message);
+
     case "!characters": return ggst.characterHandler(message);
     case "!addcharacter": return ggst.addCharacterHandler(message);
+    // case "!updatecharacter": return ggst.updateCharacterHandler(message);
+    case "!delcharacter": return ggst.deleteCharacterHandler(message);
+
     case "!fd": return ggst.characterMoveHandler(message);
     case "!addfd": return ggst.addMoveHandler(message);
     case "!fdall": return ggst.allCharacterMoveHandler(message);
+    // case "!updatefd": return ggst.updateMoveHandler(message);
+    case "!delfd": return ggst.deleteMoveHandler(message);
     default: break;
   }
 

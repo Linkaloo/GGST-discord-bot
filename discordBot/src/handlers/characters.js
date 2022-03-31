@@ -48,3 +48,36 @@ export const addCharacterHandler = async (message) => {
 
   return { embeds: [embed] };
 };
+
+export const deleteCharacterHandler = async (message) => {
+  const baseMessage = message.content.substring(message.content.indexOf(" ") + 1);
+  const character = baseMessage.split(" ").filter((s) => s !== "").join(" ");
+  const embed = new Discord.MessageEmbed();
+
+  if (character[0] === "!") {
+    embed.setDescription("Provide a character's name").setColor("RED");
+    return { embeds: [embed] };
+  }
+
+  const response = await requests.deleteCharacter(character);
+  console.log(response);
+  if (response.error) {
+    embed.setTitle("Error");
+    embed.setDescription("Could not delete character");
+    embed.setColor("RED");
+    return { embeds: [embed] };
+  }
+
+  if (response.total_deleted === 0) {
+    embed.setTitle("Error");
+    embed.setDescription(`No character named ${character} to delete`);
+    embed.setColor("YELLOW");
+    return { embeds: [embed] };
+  }
+
+  embed.setTitle("Success");
+  embed.setDescription(`Succesfully deleted player: **${character}**`);
+  embed.setColor("GREEN");
+
+  return { embeds: [embed] };
+};
