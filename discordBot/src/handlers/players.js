@@ -4,9 +4,9 @@ import * as requests from "../requests";
 export const playerHandler = async (message) => {
   const baseMessage = message.content.substring(message.content.indexOf("s") + 2);
   const characterName = baseMessage.split(" ").filter((s) => s !== "").join(" ");
-
-  const { players } = await requests.getPlayers(characterName);
+  const guild = parseInt(message.guildId, 10);
   const embed = new Discord.MessageEmbed();
+  const { players } = await requests.getPlayers(guild, characterName);
 
   players.forEach((player) => {
     if (player.stream) {
@@ -44,8 +44,8 @@ export const addPlayerHandler = async (message) => {
     region,
     character,
     stream,
+    guild_id: parseInt(message.guildId, 10),
   };
-
   const response = await requests.addPlayer(body);
   if (response.error) {
     try {
@@ -80,8 +80,7 @@ export const deletePlayerHandler = async (message) => {
     return { embeds: [embed] };
   }
 
-  const response = await requests.deletePlayer(player);
-  console.log(response);
+  const response = await requests.deletePlayer(parseInt(message.guildId, 10), player);
   if (response.error) {
     embed.setTitle("Error");
     embed.setDescription("Could not delete player");
@@ -101,4 +100,12 @@ export const deletePlayerHandler = async (message) => {
   embed.setColor("GREEN");
 
   return { embeds: [embed] };
+};
+
+export const deleteAllPlayersHandler = async (message) => {
+  const baseMessage = message.content.substring(message.content.indexOf(" ") + 1);
+  const character = baseMessage.split(" ").filter((s) => s !== "").join(" ");
+  const embed = new Discord.MessageEmbed();
+
+  const response = await requests.deletePlayer();
 };

@@ -11,4 +11,5 @@ export const commands = {
   "!delplayer": "!delplayer",
   "!delfd": "!delfd",
   "!delcharacter": "!delcharacter",
+  "!delall": "!delall",
 };

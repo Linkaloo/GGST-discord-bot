@@ -11,6 +11,7 @@ const commandHandler = async (message) => {
     case "!addplayer": return ggst.addPlayerHandler(message);
     // case "!updateplayer": return ggst.updatePlayerHandler(message);
     case "!delplayer": return ggst.deletePlayerHandler(message);
+    case "!delall": return ggst.deleteAllPlayersHandler(message);
 
     case "!characters": return ggst.characterHandler(message);
     case "!addcharacter": return ggst.addCharacterHandler(message);

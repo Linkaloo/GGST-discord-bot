@@ -86,14 +86,12 @@ module.exports = {
       name: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
       },
       region: {
         type: Sequelize.STRING,
       },
       stream: {
         type: Sequelize.STRING,
-        unique: true,
       },
       character_id: {
         type: Sequelize.INTEGER,
@@ -103,6 +101,10 @@ module.exports = {
           model: "character",
           key: "id",
         },
+      },
+      guild_id: {
+        type: Sequelize.BIGINT,
+        allowNull: false,
       },
       created_at: {
         allowNull: false,

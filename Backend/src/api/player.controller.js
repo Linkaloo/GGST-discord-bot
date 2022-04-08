@@ -1,10 +1,11 @@
 import db from "../../models/index";
 
 const apiGetPlayers = async (req, res) => {
-  const query = {};
+  const query = { guild_id: req.params.guild };
+  const charQuery = {};
 
   if (req.params.character) {
-    query.name = req.params.character;
+    charQuery.name = req.params.character;
   }
 
   const list = await db.Player.findAll({
@@ -14,8 +15,9 @@ const apiGetPlayers = async (req, res) => {
     include: {
       model: db.Character,
       attributes: ["name", "image"],
-      where: query,
+      where: charQuery,
     },
+    where: query,
   });
 
   const response = {
@@ -27,14 +29,20 @@ const apiGetPlayers = async (req, res) => {
 const apiCreatePlayer = async (req, res) => {
   const player = req.body;
   let response;
+  let character;
+  let newPlayer;
 
   try {
-    const character = await db.Character.findOne({ where: { name: player.character } });
-    const newPlayer = await character.createPlayer(player);
+    character = await db.Character.findOne({ where: { name: player.character } });
+    player.character_id = character.id;
+    delete player.character;
+
+    newPlayer = await db.Player.findOrCreate({ where: player });
     response = newPlayer;
   } catch (err) {
+    const message = (character === null ? "character does not exist" : "player could not be created");
     response = {
-      error: err,
+      error: { ...err, message },
     };
   }
   return res.json(response);
@@ -43,15 +51,41 @@ const apiCreatePlayer = async (req, res) => {
 const apiDeletePlayer = async (req, res) => {
   let response;
   const { params } = req;
-  try {
-    const des = await db.Player.destroy({ where: { name: params.player } });
-    response = {
-      total_deleted: des,
-    };
-  } catch (err) {
-    response = {
-      error: err,
-    };
+  if (Object.keys(params).length === 2) {
+    try {
+      const des = await db.Player.destroy(
+        {
+          where: {
+            name: params.player,
+            guild_id: params.guild,
+          },
+        },
+      );
+      response = {
+        total_deleted: des,
+      };
+    } catch (err) {
+      response = {
+        error: err,
+      };
+    }
+  } else {
+    try {
+      const des = await db.Player.destroy(
+        {
+          where: {
+            guild_id: params.guild,
+          },
+        },
+      );
+      response = {
+        total_deleted: des,
+      };
+    } catch (err) {
+      response = {
+        error: err,
+      };
+    }
   }
 
   return res.json(response);
@@ -67,19 +101,18 @@ const apiUpdatePlayer = async (req, res) => {
       update.character_id = newCharacter.id;
     } catch (err) {
       response = {
-        error: "Character not found",
-        character: update.character,
+        error: { ...err, message: "Character not found", character: update.character },
       };
       return res.json(response);
     }
   }
-
   try {
     const updatedPlayer = await db.Player.update(
       update,
       {
         where: {
           name: update.current,
+          guild_id: update.guild,
         },
       },
     );
@@ -91,7 +124,7 @@ const apiUpdatePlayer = async (req, res) => {
     };
   } catch (err) {
     response = {
-      error: err,
+      error: { ...err, message: "could not update player" },
     };
   }
   return res.json(response);

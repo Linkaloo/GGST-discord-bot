@@ -17,14 +17,15 @@ module.exports = (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
     region: {
       type: DataTypes.STRING,
     },
     stream: {
       type: DataTypes.STRING,
-      unique: true,
+    },
+    guild_id: {
+      type: DataTypes.BIGINT,
     },
   }, {
     sequelize,

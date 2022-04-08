@@ -1,6 +1,7 @@
 import { Client, Intents } from "discord.js";
 import dotenv from "dotenv";
 import messageHandler from "./handlers/MessageHandler";
+import twitchHandler from "./handlers/twichHandler";
 
 dotenv.config();
 
@@ -10,10 +11,16 @@ const client = new Client({
     Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS],
 });
 
-client.once("ready", () => {
-  console.log("ready!");
+client.once("ready", async () => {
+  try {
+    const guild = await client.guilds.fetch();
+    console.log(guild);
+    console.log("ready");
+    // twitchHandler();
+  } catch (err) {
+    console.log(err);
+  }
 });
-
 client.on("messageCreate", async (message) => {
   if (message.author.bot) {
     console.log("ignoring bot message");

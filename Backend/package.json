@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --exec ./node_modules/.bin/babel-node index.js",
-    "run-migrations": "npx sequelize-cli db:migrate",
-    "run-seeds": "npx sequelize-cli db:seed:all"
+    "delete-tables": "npx sequelize-cli db:migrate:undo",
+    "restore-tables": "npx sequelize-cli db:migrate",
+    "restore-seed": "npx sequelize-cli db:seed:all",
+    "reset-db": "npm run delete-tables && npm run restore-tables && npm run restore-seed"
   },
   "keywords": [],
   "author": "",
@@ -20,8 +22,12 @@
     "sequelize-cli": "^6.4.1"
   },
   "dependencies": {
+    "@twurple/api": "^5.0.18",
+    "@twurple/auth": "^5.0.18",
+    "axios": "^0.26.1",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
+    "jsonwebtoken": "^8.5.1",
     "pg": "^8.7.3",
     "sequelize": "^6.17.0"
   }
